@@ -1,0 +1,6 @@
+e1:LOC
+e2:PER
+
+Russia;Dmitry Medvedev
+Ukraine;Viktor Yushchenko
+Iran;Mahmoud Ahmadinejad
