@@ -107,7 +107,7 @@ class Config(object):
 
         try:
             os.path.isfile("vsm.pkl")
-            f = open("vsm.pkl", "r")
+            f = open("vsm.pkl", "rb")
             print("\nLoading tf-idf model from disk...")
             self.vsm = pickle.load(f)
             f.close()

@@ -8,6 +8,8 @@ import sys
 
 from copy import deepcopy
 from math import log
+import time
+import random
 
 
 class Pattern(object):
@@ -39,6 +41,9 @@ class Pattern(object):
             return True
         else:
             return False
+
+    def __hash__(self):
+        return hash(('%s%s'%(time.time, random.randint(1,10000000))))
 
     def update_confidence_2003(self, config):
         if self.positive > 0:

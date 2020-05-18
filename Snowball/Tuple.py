@@ -8,7 +8,7 @@ import sys
 
 from nltk import pos_tag, word_tokenize
 from Snowball.ReVerb import Reverb
-
+from dataclasses import dataclass
 
 class Tuple(object):
     # see: http://www.ling.upenn.edu/courses/Fall_2007/ling001/penn_treebank_pos.html
@@ -56,7 +56,10 @@ class Tuple(object):
         return (
                     self.e1 == other.e1 and self.e2 == other.e2 and self.bef_words == other.bef_words and
                     self.bet_words == other.bet_words and self.aft_words == other.aft_words)
+    def __hash__(self):
+        return hash((self.e1, self.e2, self.bef_words, self.bet_words, self.aft_words))
 
+        return super().__hash__()    
     def get_vector(self, context):
         if context == "bef":
             return self.bef_vector

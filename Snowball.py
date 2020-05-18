@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from Snowball import Config, Pattern, Tuple
+from Snowball import Config
+from Snowball.Pattern import Pattern
+from Snowball.Tuple import Tuple
 
 __author__ = "David S. Batista"
 __email__ = "dsbatista@inesc-id.pt"
@@ -37,7 +39,7 @@ class Snowball(object):
         """
         try:
             os.path.isfile("processed_tuples.pkl")
-            f = open("processed_tuples.pkl", "r")
+            f = open("processed_tuples.pkl", "rb")
             print("\nLoading processed tuples from disk...")
             self.processed_tuples = pickle.load(f)
             f.close()
@@ -72,7 +74,7 @@ class Snowball(object):
 
     def init_bootstrapp(self, tuples):
         if tuples is not None:
-            f = open(tuples, "r")
+            f = open(tuples, "rb")
             print("Loading pre-processed sentences", tuples)
             self.processed_tuples = pickle.load(f)
             f.close()
@@ -190,7 +192,8 @@ class Snowball(object):
                     # use past confidence values to calculate new confidence
                     # if parameter Wupdt < 0.5 the system trusts new examples less on each iteration
                     # which will lead to more conservative patterns and have a damping effect.
-                    if iter > 0:
+                    #if iter > 0:
+                    if 1 > 0:
                         t.confidence = t.confidence * self.config.wUpdt + t.confidence_old * (1 - self.config.wUpdt)
 
                 # update seed set of tuples to use in next iteration
@@ -209,15 +212,15 @@ class Snowball(object):
         f_output = open("relationships.txt", "w")
         tmp = sorted(self.candidate_tuples, key=lambda tpl: tpl.confidence, reverse=True)
         for t in tmp:
-            f_output.write("instance: "+t.e1.encode("utf8")+'\t'+t.e2.encode("utf8")+'\tscore:'+str(t.confidence)+'\n')
-            f_output.write("sentence: "+t.sentence.encode("utf8")+'\n')
+            f_output.write("instance: "+str(t.e1)+'\t'+str(t.e2)+'\tscore:'+str(t.confidence)+'\n')
+            f_output.write("sentence: %s\n"%t.sentence)
             # writer patterns that extracted this tuple
             patterns = set()
             for pattern in self.candidate_tuples[t]:
                 patterns.add(pattern[0])
             for p in patterns:
                 p.merge_tuple_patterns()
-                f_output.write("pattern_bet: " + ', '.join(p.tuple_patterns) + '\n')
+                f_output.write("pattern_bet: %s\n"%', '.join(p.tuple_patterns) )
             if t.passive_voice is False or t.passive_voice is None:
                 f_output.write("passive voice: False\n")
             elif t.passive_voice is True:
