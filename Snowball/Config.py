@@ -22,7 +22,7 @@ class Config(object):
         self.negative_seed_tuples = set()
         self.e1_type = None
         self.e2_type = None
-        self.stopwords = stopwords.words('english')
+        self.stopwords = set(stopwords.words('english'))
         self.threshold_similarity = similarity
         self.instance_confidance = confidance
         self.reverb = Reverb()
