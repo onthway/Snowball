@@ -70,11 +70,17 @@ class Config(object):
             if line.startswith("gamma"):
                 self.gamma = float(line.split("=")[1])
 
+            if line.startswith("language"):
+                self.language = line.split("=")[1].strip()
+
         assert self.alpha+self.beta+self.gamma == 1
 
         self.read_seeds(seeds_file)
         self.read_negative_seeds(negative_seeds)
         fileinput.close()
+        if self.language == 'chinese':
+            self.stopwords = set([' ',])
+            
 
         print("\nConfiguration parameters")
         print("========================")
@@ -105,6 +111,9 @@ class Config(object):
         print("iteration wUpdt      :", self.wUpdt)
         print("\n")
 
+        print("laguage      :", self.language)
+        print("\n")
+
         try:
             os.path.isfile("vsm.pkl")
             f = open("vsm.pkl", "rb")
@@ -114,7 +123,7 @@ class Config(object):
 
         except IOError:
             print("\nGenerating tf-idf model from sentences...")
-            self.vsm = VectorSpaceModel.VectorSpaceModel(sentences_file, self.stopwords)
+            self.vsm = VectorSpaceModel.VectorSpaceModel(sentences_file, self.stopwords, self.language)
             print("\nWriting generated model to disk...")
             f = open("vsm.pkl", "wb")
             pickle.dump(self.vsm, f)

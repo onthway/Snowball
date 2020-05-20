@@ -7,6 +7,8 @@ __email__ = "dsbatista@inesc-id.pt"
 import sys
 
 from nltk import pos_tag, word_tokenize
+import jieba.posseg as pseg
+import jieba
 from Snowball.ReVerb import Reverb
 from dataclasses import dataclass
 
@@ -33,6 +35,9 @@ class Tuple(object):
         self.bet_reverb_vector = None
         self.aft_reverb_vector = None
         self.passive_voice = None
+
+        if self.config.language == 'chinese':
+            self.filter_pos = ['x']
 
         if config.use_reverb == 'yes':
             # construct TF-IDF vectors with the words part of a ReVerb pattern
@@ -76,8 +81,11 @@ class Tuple(object):
         return self.config.vsm.tf_idf_model[vect_ids]
 
     def tokenize(self, text):
-        return [word for word in word_tokenize(text.lower())
-                if word not in self.config.stopwords]
+        if self.config.language == 'chinese':
+            wt = jieba.cut(text)
+        else:
+            wt = word_tokenize(text.lower())
+        return [word for word in wt if word not in self.config.stopwords]
 
     def construct_pattern_vector(self, pattern_tags, config):
         # construct TF-IDF representation for each context
@@ -92,8 +100,18 @@ class Tuple(object):
     def construct_words_vectors(self, words, config):
         # split text into tokens and tag them using NLTK's default English tagger
         # POS_TAGGER = 'taggers/maxent_treebank_pos_tagger/english.pickle'
-        text_tokens = word_tokenize(words)
-        tags_ptb = pos_tag(text_tokens)
+        if self.config.language == 'chinese':
+             
+            wp = [(w,p) for w, p in pseg.lcut(words)]
+            text_tokens = [w for w,p in wp]
+            tags_ptb = [[w, p] for w,p in wp]
+        else:
+            text_tokens = word_tokenize(words)
+            tags_ptb = pos_tag(text_tokens)
+
+
+        #text_tokens = word_tokenize(words)
+        #tags_ptb = pos_tag(text_tokens)
         pattern = [t[0] for t in tags_ptb if
                    t[0].lower() not in config.stopwords and t[1] not in self.filter_pos]
         if len(pattern) >= 1:

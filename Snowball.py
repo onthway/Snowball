@@ -15,6 +15,7 @@ import operator
 from collections import defaultdict
 
 from nltk import word_tokenize
+import jieba
 from gensim.matutils import cossim
 
 from Snowball.Sentence import Sentence
@@ -54,13 +55,18 @@ class Snowball(object):
                 if count % 10000 == 0:
                     sys.stdout.write(".")
                 sentence = Sentence(line.strip(), self.config.e1_type, self.config.e2_type, self.config.max_tokens_away,
-                                    self.config.min_tokens_away, self.config.context_window_size)
+                                    self.config.min_tokens_away, self.config.context_window_size, self.config)
 
                 for rel in sentence.relationships:
                     if rel.arg1type == self.config.e1_type and rel.arg2type == self.config.e2_type:
-                        bef_tokens = word_tokenize(rel.before)
-                        bet_tokens = word_tokenize(rel.between)
-                        aft_tokens = word_tokenize(rel.after)
+                        if self.config.language == 'chinese':
+                            bef_tokens = jieba.lcut(rel.before)
+                            bet_tokens = jieba.lcut(rel.between)
+                            aft_tokens = jieba.lcut(rel.after)
+                        else:
+                            bef_tokens = word_tokenize(rel.before)
+                            bet_tokens = word_tokenize(rel.between)
+                            aft_tokens = word_tokenize(rel.after)
                         if not (bef_tokens == 0 and bet_tokens == 0 and aft_tokens == 0):
                             t = Tuple(rel.ent1, rel.ent2, rel.sentence, rel.before, rel.between, rel.after, self.config)
                             self.processed_tuples.append(t)

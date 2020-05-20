@@ -10,15 +10,17 @@ import re
 
 from gensim import corpora
 import nltk
+import jieba
 from gensim.models import TfidfModel
 import functools
 from Snowball.utils import timer
 
 class VectorSpaceModel(object):
-    @timer
-    def __init__(self, sentences_file, stopwords):
+    #@timer
+    def __init__(self, sentences_file, stopwords, language):
         self.dictionary = None
         self.corpus = None
+        self.language = language
         """              
         f_sentences = codecs.open(sentences_file, encoding='utf-8')
         documents = list()
@@ -41,7 +43,11 @@ class VectorSpaceModel(object):
         def cleansent(line, stopwords):
             line = re.sub('<[A-Z]+>[^<]+</[A-Z]+>', '', line)
             # remove stop words and tokenize
-            document = [word for word in nltk.word_tokenize(line.lower()) if word not in stopwords]
+            if self.language == 'chinese':
+                document = [word for word in jieba.cut(line) if word not in stopwords]
+
+            else:
+                document = [word for word in nltk.word_tokenize(line.lower()) if word not in stopwords]
             return document
 
         with open(sentences_file, 'r') as f:

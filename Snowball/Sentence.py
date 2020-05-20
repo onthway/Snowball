@@ -6,6 +6,7 @@ __email__ = "dsbatista@inesc-id.pt"
 
 import re
 from nltk import word_tokenize
+import jieba
 
 # regex for simple tags, e.g.:
 # <PER>Bill Gates</PER>
@@ -68,9 +69,10 @@ class Relationship:
 
 class Sentence:
 
-    def __init__(self, _sentence, e1_type, e2_type, max_tokens, min_tokens, window_size):
+    def __init__(self, _sentence, e1_type, e2_type, max_tokens, min_tokens, window_size, _config):
         self.relationships = set()
         self.sentence = _sentence
+        self.config = _config
         matches = []
 
         #TODO: regex to used depends on Config.tags_type
@@ -94,14 +96,24 @@ class Sentence:
                 after = self.sentence[matches[x + 1].end(): end]
 
                 # select 'window_size' tokens from left and right context
-                before = word_tokenize(before)[-window_size:]
-                after = word_tokenize(after)[:window_size]
-                before = ' '.join(before)
-                after = ' '.join(after)
+                if self.config.language == 'chinese':
+                    before = jieba.lcut(before)[-window_size:]
+                    after = jieba.lcut(after)[:window_size]
+                    before = ''.join(before)
+                    after = ''.join(after)
+                    
+                else:
+                    before = word_tokenize(before)[-window_size:]
+                    after = word_tokenize(after)[:window_size]
+                    before = ' '.join(before)
+                    after = ' '.join(after)
 
                 # only consider relationships where the distance between the two entities
                 # is less than 'max_tokens' and greater than 'min_tokens'
-                number_bet_tokens = len(word_tokenize(between))
+                if self.config.language == 'chinese':
+                    number_bet_tokens = len(jieba.lcut(between))
+                else:
+                    number_bet_tokens = len(word_tokenize(between))
                 if not number_bet_tokens > max_tokens and not number_bet_tokens < min_tokens:
 
                     #TODO: run code according to Config.tags_type
